@@ -8,10 +8,13 @@ mv batch3/Aligned/*_rmd.bam* bam_pascuorum/
 
 ls bam_pascuorum/*_rmd.bam > all_bams.list
 
+# genome=/scratch/patrycja/reference_genomes/Bombus_lapidarius/GCA_964186655.1_iyBomLapi1.1_genomic.fna
+# genome=/scratch/patrycja/reference_genomes/Bombus_pascuorum/GCF_905332965.1_iyBomPasc1.1_genomic.fna
+
 
 # Run mpileup per chromosome using parallel 
 cat pascuorum_chromosomes.txt | parallel -j 40 \
-    "bcftools mpileup -Ou -f ../reference_genomes/Bombus_pascuorum/GCF_905332965.1_iyBomPasc1.1_genomic.fna \
+    "bcftools mpileup -Ou -f $genome \
     -b all_bams.list \
     -r {} -q 20 -Q 30 -C 50 -d 250 -a FORMAT/DP,FORMAT/AD \
     -o bcf_pascuorum/raw_mpileup_{}.bcf"
@@ -30,10 +33,9 @@ cat pascuorum_chromosomes.txt | parallel -j 40 \
 # done
 
 # ## merge all vcfs from different chromosomes
-# ls -1 *_raw_snps.vcf.gz > vcf_list.txt
-# bcftools concat -Oz vcf_list.txt -o Goe_raw_snp.vcf.gz
-# tabix -p vcf Goe_raw_snp.vcf.gz
+ls -1 *_raw_snps.vcf.gz > vcf_list.txt
+bcftools concat -Oz -f vcf_list.txt -o Combee_BP_raw_snp.vcf.gz
+tabix -p vcf Combee_BP_raw_snp.vcf.gz
 
 # ## check summary information stats from vcf file
 # bcftools stats  -s - Goe_raw_snp.vcf.gz > Goe_raw_snp.sumstats
-
